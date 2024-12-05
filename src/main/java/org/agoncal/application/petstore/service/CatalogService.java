@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.io.Serializable;
 import java.util.List;
@@ -162,10 +163,14 @@ public class CatalogService implements Serializable {
     public List<Item> searchItems(String keyword) {
         if (keyword == null)
             keyword = "";
+        Query query = em.createNativeQuery("CALL searchKeywordLength(:keyword)");
+        query.setParameter("keyword",keyword );
+        int result = query.getFirstResult();
+        log.info("Search keyword length: {}", result);
 
-        TypedQuery<Item> typedQuery = em.createNamedQuery(Item.SEARCH, Item.class);
-        typedQuery.setParameter("keyword", "%" + keyword.toUpperCase() + "%");
-        return typedQuery.getResultList();
+       TypedQuery<Item> typedQuery = em.createNamedQuery(Item.SEARCH, Item.class);
+       typedQuery.setParameter("keyword", "%" + keyword.toUpperCase() + "%");
+       return typedQuery.getResultList();
     }
 
     public List<Item> findAllItems() {
@@ -207,4 +212,6 @@ public class CatalogService implements Serializable {
 
         removeItem(findItem(itemId));
     }
+
+
 }

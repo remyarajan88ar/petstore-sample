@@ -2,6 +2,9 @@ package org.agoncal.application.petstore.domain;
 
 import org.agoncal.application.petstore.constraint.NotEmpty;
 import org.agoncal.application.petstore.constraint.Price;
+import org.eclipse.persistence.annotations.Direction;
+import org.eclipse.persistence.annotations.NamedStoredProcedureQuery;
+import org.eclipse.persistence.annotations.StoredProcedureParameter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -21,6 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = Item.SEARCH, query = "SELECT i FROM Item i WHERE UPPER(i.name) LIKE :keyword OR UPPER(i.product.name) LIKE :keyword ORDER BY i.product.category.name, i.product.name"),
         @NamedQuery(name = Item.FIND_ALL, query = "SELECT i FROM Item i")
 })
+//@NamedStoredProcedureQuery(name = "searchKeywordLength", procedureName = "searchKeywordLength", resultClass = Integer.class, parameters = {@StoredProcedureParameter(name = "keyword", type = String.class, direction = Direction.IN, queryParameter = "keyword")})
 @XmlRootElement
 public class Item {
 

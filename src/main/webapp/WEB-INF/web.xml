@@ -17,6 +17,10 @@
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
+    <listener>
+        <listener-class>org.agoncal.application.petstore.web.H2ConsoleListener</listener-class>
+    </listener>
+
 
     <!-- To define a datasource we use the @Datasource annotation -->
     <!--<data-source>-->

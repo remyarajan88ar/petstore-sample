@@ -9,6 +9,8 @@ import javax.annotation.sql.DataSourceDefinition;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  * @author Antonio Goncalves
@@ -51,6 +53,10 @@ public class DBPopulator {
     @Inject
     private CustomerService customerService;
 
+    @Inject
+    private EntityManager em;
+
+
     // ======================================
     // =          Lifecycle Methods         =
     // ======================================
@@ -59,6 +65,7 @@ public class DBPopulator {
     private void populateDB() {
         initCatalog();
         initCustomers();
+        initKeywordStoredProcedure();
     }
 
     @PreDestroy
@@ -215,6 +222,32 @@ public class DBPopulator {
         customerService.createCustomer(steve);
         customerService.createCustomer(user);
         customerService.createCustomer(admin);
+    }
+
+    private void initKeywordStoredProcedure() {
+
+        Query createProcedureQuery = em.createNativeQuery(
+                "CREATE ALIAS searchKeywordLength AS " +
+                        "$$ " +
+                        "    int keywordLength(String keyword){" +
+                        " return keyword.length();}"+
+                        "$$;"
+        );
+
+        createProcedureQuery.executeUpdate();
+    }
+
+    private void initPriceStoredProcedure() {
+
+        Query createProcedureQuery = em.createNativeQuery(
+                "CREATE ALIAS orderPrice AS " +
+                        "$$ " +
+                        "    Float getOrderPrice(int quantity, Float unitCost){" +
+                        " return quantity*unitCost;}"+
+                        "$$;"
+        );
+
+        createProcedureQuery.executeUpdate();
     }
 
 }

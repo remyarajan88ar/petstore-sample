@@ -3,10 +3,14 @@ package org.agoncal.application.petstore.service;
 import org.agoncal.application.petstore.domain.*;
 import org.agoncal.application.petstore.exception.ValidationException;
 import org.agoncal.application.petstore.util.Loggable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,6 +25,7 @@ import java.util.List;
 @Stateless
 @Loggable
 public class OrderService implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     // ======================================
     // =             Attributes             =
@@ -47,6 +52,7 @@ public class OrderService implements Serializable {
 
         for (CartItem cartItem : cartItems) {
             orderLines.add(new OrderLine(cartItem.getQuantity(), em.merge(cartItem.getItem())));
+            orderPrice(cartItem.getItem().getUnitCost(), cartItem.getQuantity());
         }
         order.setOrderLines(orderLines);
 
@@ -55,6 +61,8 @@ public class OrderService implements Serializable {
 
         return order;
     }
+
+
 
     public Order findOrder(Long orderId) {
         if (orderId == null)
@@ -74,4 +82,15 @@ public class OrderService implements Serializable {
 
         em.remove(em.merge(order));
     }
+
+    public void orderPrice(Float unitCost, Integer quantity ){
+        Query query = em.createNativeQuery("CALL orderPrice(:quantity, :unitCost)");
+        query.setParameter("quantity",quantity );
+        query.setParameter("unitCost", unitCost);
+        Float result = (float) query.getFirstResult();
+        log.info("Order price: {}", result);
+
+    }
+
+
 }

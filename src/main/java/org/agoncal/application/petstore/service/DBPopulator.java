@@ -66,6 +66,7 @@ public class DBPopulator {
         initCatalog();
         initCustomers();
         initKeywordStoredProcedure();
+        initPriceStoredProcedure();
     }
 
     @PreDestroy

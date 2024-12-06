@@ -52,7 +52,7 @@ public class OrderService implements Serializable {
 
         for (CartItem cartItem : cartItems) {
             orderLines.add(new OrderLine(cartItem.getQuantity(), em.merge(cartItem.getItem())));
-            orderPrice(cartItem.getItem().getUnitCost(), cartItem.getQuantity());
+            orderPrice(cartItem.getItem().getUnitCost(), cartItem.getQuantity(), order.getId());
         }
         order.setOrderLines(orderLines);
 
@@ -83,10 +83,11 @@ public class OrderService implements Serializable {
         em.remove(em.merge(order));
     }
 
-    public void orderPrice(Float unitCost, Integer quantity ){
-        Query query = em.createNativeQuery("CALL orderPrice(:quantity, :unitCost)");
+    public void orderPrice(Float unitCost, Integer quantity, Long orderId ){
+        Query query = em.createNativeQuery("CALL orderPrice(:quantity, :unitCost, :oderId)");
         query.setParameter("quantity",quantity );
         query.setParameter("unitCost", unitCost);
+        query.setParameter("orderId", orderId);
         Float result = (float) query.getFirstResult();
         log.info("Order price: {}", result);
 

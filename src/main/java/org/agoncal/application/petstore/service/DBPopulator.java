@@ -2,6 +2,7 @@ package org.agoncal.application.petstore.service;
 
 import org.agoncal.application.petstore.domain.*;
 import org.agoncal.application.petstore.util.Loggable;
+import org.h2.jdbcx.JdbcDataSource;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -11,6 +12,10 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * @author Antonio Goncalves
@@ -243,8 +248,20 @@ public class DBPopulator {
         Query createProcedureQuery = em.createNativeQuery(
                 "CREATE ALIAS orderPrice AS " +
                         "$$ " +
-                        "    Float getOrderPrice(int quantity, Float unitCost){" +
-                        " return quantity*unitCost;}"+
+                        "Float getOrderPrice(int quantity, Float unitCost, Long orderId) throws SQLException {\n" +
+                        "        Connection conn = java.sql.DriverManager.getConnection(\n" +
+                        "                \"jdbc:h2:mem:applicationPetstoreDB;DB_CLOSE_DELAY=-1;MODE=MYSQL\", \"sa\", \"\");\n"+
+                        "        Float totalPrice = quantity * unitCost;\n" +
+                        "        String sql = String.format(\"INSERT INTO orderdetails (orderId, quantity, unitCost, totalPrice) VALUES(%s, %s,%s,%s)\",orderId, quantity, unitCost,totalPrice);\n" +
+                        "        PreparedStatement stmt = conn.prepareStatement(sql);\n" +
+                        "        stmt.setLong(1,orderId);\n" +
+                        "        stmt.setInt(2,quantity);\n" +
+                        "        stmt.setFloat(3,unitCost);\n" +
+                        "        stmt.setFloat(4,totalPrice);\n" +
+                        "        stmt.executeQuery();\n" +
+                        "        return totalPrice;\n" +
+                        "        \n" +
+                        "    }"+
                         "$$;"
         );
 
